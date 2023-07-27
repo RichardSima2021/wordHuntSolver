@@ -5,7 +5,7 @@ def modifyWords():
 
             with open("filtered_words.txt", "w") as fw:
                 for line in lines:
-                    if len(line.strip()) > 2 or len(line.strip()) <= 16:
+                    if len(line.strip()) > 2 and len(line.strip()) <= 16:
                         fw.write(line)
                     else:
                         print("Removed " + line)

@@ -3,7 +3,7 @@ consonant_blends = {
     'c':{'cl','cr','ch'},
     'd':{'dr'},
     'f':{'fr','fl'},
-    't':{'tr','th'},
+    't':{'tr','th','tw'},
     'g':{'gl','gr'},
     'p':{'pr','pl'},
     's':{'sl','sm','sp','st','sh','sn','sc','sk','sw'},
@@ -35,9 +35,9 @@ def print_board(board):
     for line in board:
         print(line)
 
-def load_words():
+def load_words(fileName):
     try:
-        with open("filtered_words.txt", "r") as word_list:
+        with open(fileName, "r") as word_list:
             lines = list(word_list.readlines())
             return lines
     except:
@@ -55,7 +55,7 @@ def find_words():
             ]
             board_status[r][c] = 1
             start_char = board[r][c]
-
+            print("START CHAR:", start_char)
             list_start_index = letter_indices[start_char]
             list_end_index = -1
             if start_char != 'Z':
@@ -66,6 +66,7 @@ def find_words():
             # that's now the start index of the next char in the list aka where our word search will end
             # use that index and get the character from the letter_indices keys
             # then use that character to find the letter_index
+            # print(words[list_start_index:list_end_index])
             dfs(start_char, r, c, board_status, list_start_index, list_end_index)
 
 def dfs(cur_str, row, col, board_status, start_index, end_index):
@@ -83,7 +84,7 @@ def dfs(cur_str, row, col, board_status, start_index, end_index):
             l -= 1
         i += 1
 
-    # print(possible_coords)
+    print(possible_coords)
     for r,c in possible_coords:
         # print(r,c)
         new_cur_str = cur_str + board[r][c]
@@ -95,12 +96,13 @@ def dfs(cur_str, row, col, board_status, start_index, end_index):
 
         board_status[r][c] = 1
         for word in words[start_index: end_index]:
-            if word == new_cur_str:
+            if word.strip() == new_cur_str:
                 print("Found word:",word)
             elif word.startswith(new_cur_str):
                 dfs(new_cur_str, r, c, board_status, start_index, end_index)
 
         print("exhausted all words that start with ", new_cur_str)
+        print_board(board_status)
         board_status[r][c] = 0
     return
 
@@ -115,7 +117,7 @@ if __name__ == '__main__':
         ['S', 'D', 'E', 'N']
     ]
 
-    words = load_words()
+    words = load_words("filtered_words.txt")
 
     # get word indices
     # for i in range(1,len(words)):
