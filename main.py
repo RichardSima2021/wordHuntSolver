@@ -71,6 +71,7 @@ def find_words():
 
 def dfs(cur_str, row, col, board_status, start_index, end_index):
     print('cur_str:', cur_str)
+    print_board(board_status)
     possible_coords = [(row+1, col), (row+1, col-1), (row+1, col+1),
                        (row-1, col-1), (row-1, col), (row-1, col+1),
                        (row, col +1), (row, col-1)]
@@ -86,9 +87,8 @@ def dfs(cur_str, row, col, board_status, start_index, end_index):
 
     print(possible_coords)
     for r,c in possible_coords:
-        # print(r,c)
         new_cur_str = cur_str + board[r][c]
-        print("new_cur_str:",new_cur_str)
+        print("new_cur_str:",new_cur_str + f" {r},{c}")
         if new_cur_str[-1] not in vowels and new_cur_str[-2] not in vowels:
             if new_cur_str[-2:].lower() not in consonant_blends[new_cur_str[-2].lower()] and new_cur_str[-1] != 'S':
                 print(new_cur_str, "doesnt satisfy consonant blends")
@@ -102,7 +102,6 @@ def dfs(cur_str, row, col, board_status, start_index, end_index):
                 dfs(new_cur_str, r, c, board_status, start_index, end_index)
 
         print("exhausted all words that start with ", new_cur_str)
-        print_board(board_status)
         board_status[r][c] = 0
     return
 
