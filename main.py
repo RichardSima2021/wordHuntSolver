@@ -9,13 +9,15 @@ consonant_blends = {
     's':{'sl','sm','sp','st','sh','sn','sc','sk','sw'},
     'w':{'wh','wr'}}
 
-vowels = {'a','e','i','o','u','y'}
+vowels = {'A','E','I','O','U','Y'}
 
 letter_indices = {
     'A':0, 'B':16202, 'C':31437, 'D':56479, 'E':73099, 'F':84433, 'G':95067, 'H':104420,'I':114944,
     'J':124548, 'K':126859, 'L':130254, 'M':138312, 'N':154138, 'O':160706, 'P':169601, 'Q':193947,
     'R':195358, 'S':210379, 'T':242373, 'U':256942, 'V':266466, 'W':271056, 'X':276979, 'Y':277288, 'Z':278324}
 
+words = []
+board = []
 
 def take_input():
     board = []
@@ -42,7 +44,7 @@ def load_words():
         print("Shits fucked up")
 
 
-def find_words(board):
+def find_words():
     for r in range(len(board)):
         for c in range(len(board[0])):
             board_status = [
@@ -64,16 +66,54 @@ def find_words(board):
             # that's now the start index of the next char in the list aka where our word search will end
             # use that index and get the character from the letter_indices keys
             # then use that character to find the letter_index
-            dfs(start_char, r, c, board_status)
+            dfs(start_char, r, c, board_status, list_start_index, list_end_index)
 
-def dfs(cur_str, row, col, board_status):
-    pass
+def dfs(cur_str, row, col, board_status, start_index, end_index):
+    print('cur_str:', cur_str)
+    possible_coords = [(row+1, col), (row+1, col-1), (row+1, col+1),
+                       (row-1, col-1), (row-1, col), (row-1, col+1),
+                       (row, col +1), (row, col-1)]
+    l = len(possible_coords)
+    i = 0
+    while i < l:
+        r,c = possible_coords[i]
+        if r < 0 or r > 4 or c < 0 or c > 4 or board_status[r][c] == 1:
+            possible_coords.pop(i)
+            i -= 1
+            l -= 1
+        i += 1
+
+    # print(possible_coords)
+    for r,c in possible_coords:
+        # print(r,c)
+        new_cur_str = cur_str + board[r][c]
+        print("new_cur_str:",new_cur_str)
+        if new_cur_str[-1] not in vowels and new_cur_str[-2] not in vowels:
+            if new_cur_str[-2:].lower() not in consonant_blends[new_cur_str[-2].lower()] and new_cur_str[-1] != 'S':
+                print(new_cur_str, "doesnt satisfy consonant blends")
+                continue
+
+        board_status[r][c] = 1
+        for word in words[start_index: end_index]:
+            if word == new_cur_str:
+                print("Found word:",word)
+            elif word.startswith(new_cur_str):
+                dfs(new_cur_str, r, c, board_status, start_index, end_index)
+
+        print("exhausted all words that start with ", new_cur_str)
+        board_status[r][c] = 0
+    return
 
 if __name__ == '__main__':
 
-    board = take_input()
-    print_board(board)
-
+    # board = take_input()
+    # print_board(board)
+    board = [
+        ['I', 'A', 'O', 'T'],
+        ['T', 'U', 'E', 'O'],
+        ['W', 'B', 'W', 'S'],
+        ['S', 'D', 'E', 'N']
+    ]
 
     words = load_words()
 
@@ -85,4 +125,4 @@ if __name__ == '__main__':
     #         if words[i][0] == 'Z':
     #             break
 
-    find_words(board)
+    find_words()
