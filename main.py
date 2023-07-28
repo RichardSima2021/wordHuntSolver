@@ -16,6 +16,8 @@ letter_indices = {
     'J':124548, 'K':126859, 'L':130254, 'M':138312, 'N':154138, 'O':160706, 'P':169601, 'Q':193947,
     'R':195358, 'S':210379, 'T':242373, 'U':256942, 'V':266466, 'W':271056, 'X':276979, 'Y':277288, 'Z':278324}
 
+found_words = set()
+
 words = []
 board = []
 
@@ -44,7 +46,7 @@ def load_words(fileName):
         print("Shits fucked up")
 
 
-def find_words():
+def find_words(debug):
     for r in range(len(board)):
         for c in range(len(board[0])):
             board_status = [
@@ -55,7 +57,7 @@ def find_words():
             ]
             board_status[r][c] = 1
             start_char = board[r][c]
-            print("START CHAR:", start_char)
+            # print("START CHAR:", start_char)
             list_start_index = letter_indices[start_char]
             list_end_index = -1
             if start_char != 'Z':
@@ -67,11 +69,11 @@ def find_words():
             # use that index and get the character from the letter_indices keys
             # then use that character to find the letter_index
             # print(words[list_start_index:list_end_index])
-            dfs(start_char, r, c, board_status, list_start_index, list_end_index)
+            dfs(start_char, r, c, board_status, list_start_index, list_end_index, debug)
 
-def dfs(cur_str, row, col, board_status, start_index, end_index):
-    print('cur_str:', cur_str)
-    print_board(board_status)
+def dfs(cur_str, row, col, board_status, start_index, end_index, debug):
+    # print('cur_str:', cur_str)
+    # print_board(board_status)
     possible_coords = [(row+1, col), (row+1, col-1), (row+1, col+1),
                        (row-1, col-1), (row-1, col), (row-1, col+1),
                        (row, col +1), (row, col-1)]
@@ -79,42 +81,50 @@ def dfs(cur_str, row, col, board_status, start_index, end_index):
     i = 0
     while i < l:
         r,c = possible_coords[i]
-        if r < 0 or r > 4 or c < 0 or c > 4 or board_status[r][c] == 1:
+        if r < 0 or r >= 4 or c < 0 or c >= 4 or board_status[r][c] == 1:
             possible_coords.pop(i)
             i -= 1
             l -= 1
         i += 1
 
-    print(possible_coords)
-    for r,c in possible_coords:
+    # print(possible_coords)
+    for (r,c) in possible_coords:
         new_cur_str = cur_str + board[r][c]
-        print("new_cur_str:",new_cur_str + f" {r},{c}")
+
+        if debug:
+            print("new_cur_str:",new_cur_str + f" {r},{c}")
+
         if new_cur_str[-1] not in vowels and new_cur_str[-2] not in vowels:
-            if new_cur_str[-2:].lower() not in consonant_blends[new_cur_str[-2].lower()] and new_cur_str[-1] != 'S':
-                print(new_cur_str, "doesnt satisfy consonant blends")
+            if (new_cur_str[-2] not in consonant_blends.keys() or new_cur_str[-2:].lower() not in consonant_blends[new_cur_str[-2].lower()]) and new_cur_str[-1] != 'S':
+                # print(new_cur_str, "doesnt satisfy consonant blends")
                 continue
 
         board_status[r][c] = 1
+        # print_board(board_status)
+        used_as_prefix = False
         for word in words[start_index: end_index]:
-            if word.strip() == new_cur_str:
-                print("Found word:",word)
-            elif word.startswith(new_cur_str):
+            if word.strip() == new_cur_str and new_cur_str not in found_words:
+                # print("Found word:",word.strip('\n'))
+                found_words.add(new_cur_str)
+            elif word.startswith(new_cur_str) and not used_as_prefix:
+                used_as_prefix = True
+                # print("DFS on ", new_cur_str)
                 dfs(new_cur_str, r, c, board_status, start_index, end_index)
 
-        print("exhausted all words that start with ", new_cur_str)
+        # print("exhausted all words that start with ", new_cur_str)
         board_status[r][c] = 0
     return
 
 if __name__ == '__main__':
 
-    # board = take_input()
-    # print_board(board)
-    board = [
-        ['I', 'A', 'O', 'T'],
-        ['T', 'U', 'E', 'O'],
-        ['W', 'B', 'W', 'S'],
-        ['S', 'D', 'E', 'N']
-    ]
+    board = take_input()
+    print_board(board)
+    # board = [
+    #     ['I', 'A', 'O', 'T'],
+    #     ['T', 'U', 'E', 'O'],
+    #     ['W', 'B', 'W', 'S'],
+    #     ['S', 'D', 'E', 'N']
+    # ]
 
     words = load_words("filtered_words.txt")
 
@@ -126,4 +136,9 @@ if __name__ == '__main__':
     #         if words[i][0] == 'Z':
     #             break
 
-    find_words()
+    find_words(True)
+
+    words_list = list(found_words)
+    # words_list.sort(key=lambda x:len(x))
+    words_list.sort()
+    print(list(reversed(words_list)))
